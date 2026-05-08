@@ -56,7 +56,7 @@ export default function Inicio() {
 
   return (
     <div className="min-h-screen">
-      <div className="bg-sky-600 px-4 pt-12 pb-5 relative overflow-hidden">
+      <div className="bg-sky-600 px-4 pt-12 lg:pt-6 pb-5 relative overflow-hidden">
         <div className="absolute -right-4 -top-2 opacity-15 pointer-events-none">
           <Activity size={110} color="white" strokeWidth={1.5} />
         </div>
@@ -67,7 +67,7 @@ export default function Inicio() {
         </div>
       </div>
 
-      <div className="px-4 py-4 grid grid-cols-2 gap-3">
+      <div className="px-4 py-4 grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatColor icon={AlertCircle}   accent="bg-red-500"     bgLight="bg-red-50"     textLabel="text-red-700"     label="Abiertos"          value={stats.abiertos} />
         <StatColor icon={Clock}         accent="bg-amber-500"   bgLight="bg-amber-50"   textLabel="text-amber-700"   label="En proceso"        value={stats.en_proceso} />
         <StatColor icon={Ticket}        accent="bg-blue-500"    bgLight="bg-blue-50"    textLabel="text-blue-700"    label="Esperando cliente" value={stats.esperando} />
