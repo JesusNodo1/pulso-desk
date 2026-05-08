@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
-import { ArrowLeft, Trash2, Building2, ClipboardList, Plus } from 'lucide-react'
+import { ArrowLeft, Trash2, Building2, ClipboardList, Plus, ArrowRightLeft } from 'lucide-react'
 import { format } from 'date-fns'
+import CambiarTipoModal from '../components/CambiarTipoModal'
 
 const ESTADOS = [
   { value: 'pendiente',    label: '⏳ Pendiente'    },
@@ -26,6 +27,7 @@ export default function SolicitudDetalle() {
   const [ordenes, setOrdenes] = useState([])
   const [sistemas, setSistemas] = useState([])
   const [loading, setLoading] = useState(true)
+  const [cambiarTipo, setCambiarTipo] = useState(false)
 
   useEffect(() => { cargar() }, [id])
 
@@ -66,10 +68,21 @@ export default function SolicitudDetalle() {
             <h1 className="text-base font-bold text-gray-900 dark:text-white truncate">{sol.titulo}</h1>
           </div>
         </div>
-        {perfil.rol === 'admin' && (
-          <button onClick={borrar} className="p-2 text-red-500"><Trash2 size={16} /></button>
-        )}
+        <div className="flex items-center gap-1">
+          {perfil.rol === 'admin' && (
+            <button onClick={() => setCambiarTipo(true)} className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-white" title="Cambiar tipo">
+              <ArrowRightLeft size={16} />
+            </button>
+          )}
+          {perfil.rol === 'admin' && (
+            <button onClick={borrar} className="p-2 text-red-500"><Trash2 size={16} /></button>
+          )}
+        </div>
       </div>
+
+      {cambiarTipo && (
+        <CambiarTipoModal tipoActual="solicitud" registro={sol} onClose={() => setCambiarTipo(false)} />
+      )}
 
       <div className="p-4 space-y-4">
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-4 space-y-3">

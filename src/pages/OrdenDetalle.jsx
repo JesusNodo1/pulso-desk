@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
-import { ArrowLeft, Trash2, Ticket, Lightbulb, Plus, X, Send, MessageSquare, Calendar, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Trash2, Ticket, Lightbulb, Plus, X, Send, MessageSquare, Calendar, AlertTriangle, ArrowRightLeft } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { diasDesde, diasTexto, colorDias } from '../lib/ordenes'
 import Adjuntos from '../components/Adjuntos'
+import CambiarTipoModal from '../components/CambiarTipoModal'
 
 const ESTADOS = [
   { value: 'pendiente',   label: '⏳ Pendiente'   },
@@ -43,6 +44,7 @@ export default function OrdenDetalle() {
   const [vincSheet, setVincSheet] = useState(null)
   const [disponibles, setDisp]    = useState([])
   const [filtroDisp, setFiltroDisp] = useState('')
+  const [cambiarTipo, setCambiarTipo] = useState(false)
 
   useEffect(() => { cargar() }, [id])
 
@@ -145,10 +147,21 @@ export default function OrdenDetalle() {
             <h1 className="text-base font-bold text-gray-900 dark:text-white truncate">{orden.titulo}</h1>
           </div>
         </div>
-        {perfil.rol === 'admin' && (
-          <button onClick={borrar} className="p-2 text-red-500"><Trash2 size={16} /></button>
-        )}
+        <div className="flex items-center gap-1">
+          {perfil.rol === 'admin' && (
+            <button onClick={() => setCambiarTipo(true)} className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-white" title="Cambiar tipo">
+              <ArrowRightLeft size={16} />
+            </button>
+          )}
+          {perfil.rol === 'admin' && (
+            <button onClick={borrar} className="p-2 text-red-500"><Trash2 size={16} /></button>
+          )}
+        </div>
       </div>
+
+      {cambiarTipo && (
+        <CambiarTipoModal tipoActual="orden" registro={orden} onClose={() => setCambiarTipo(false)} />
+      )}
 
       <div className="p-4 space-y-4">
         {/* Barra de edad + vencimiento */}

@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth, puedeBorrarTicket } from '../lib/auth'
-import { ArrowLeft, Send, Tag, Trash2, MessageCircle, User, Clock, Building2, ClipboardList, CheckCircle2, RotateCcw } from 'lucide-react'
+import { ArrowLeft, Send, Tag, Trash2, MessageCircle, User, Clock, Building2, ClipboardList, CheckCircle2, RotateCcw, ArrowRightLeft } from 'lucide-react'
 import { linkWhatsApp, formatearTelefonoPY } from '../lib/phone'
 import Adjuntos from '../components/Adjuntos'
+import CambiarTipoModal from '../components/CambiarTipoModal'
 import { format, formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -38,6 +39,7 @@ export default function TicketDetalle() {
   const [enviando, setEnviando]   = useState(false)
   const [error, setError]         = useState('')
   const [guardando, setGuardando] = useState(false)
+  const [cambiarTipo, setCambiarTipo] = useState(false)
 
   useEffect(() => { cargar() }, [id])
 
@@ -129,10 +131,21 @@ export default function TicketDetalle() {
             <h1 className="text-base font-bold text-gray-900 dark:text-white truncate">{ticket.titulo}</h1>
           </div>
         </div>
-        {puedeBorrarTicket(perfil.rol) && (
-          <button onClick={borrar} className="p-2 text-red-500"><Trash2 size={16} /></button>
-        )}
+        <div className="flex items-center gap-1">
+          {perfil.rol === 'admin' && (
+            <button onClick={() => setCambiarTipo(true)} className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-white" title="Cambiar tipo">
+              <ArrowRightLeft size={16} />
+            </button>
+          )}
+          {puedeBorrarTicket(perfil.rol) && (
+            <button onClick={borrar} className="p-2 text-red-500"><Trash2 size={16} /></button>
+          )}
+        </div>
       </div>
+
+      {cambiarTipo && (
+        <CambiarTipoModal tipoActual="ticket" registro={ticket} onClose={() => setCambiarTipo(false)} />
+      )}
 
       <div className="p-4 space-y-4">
         {error && (
