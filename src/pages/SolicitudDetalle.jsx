@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
-import { ArrowLeft, Trash2, Building2, ClipboardList, Plus, ArrowRightLeft } from 'lucide-react'
+import { ArrowLeft, Trash2, Building2, ArrowRightLeft } from 'lucide-react'
 import { format } from 'date-fns'
 import CambiarTipoModal from '../components/CambiarTipoModal'
 
@@ -24,7 +24,6 @@ export default function SolicitudDetalle() {
   const navigate   = useNavigate()
   const { perfil } = useAuth()
   const [sol, setSol]         = useState(null)
-  const [ordenes, setOrdenes] = useState([])
   const [sistemas, setSistemas] = useState([])
   const [loading, setLoading] = useState(true)
   const [cambiarTipo, setCambiarTipo] = useState(false)
@@ -33,13 +32,11 @@ export default function SolicitudDetalle() {
 
   async function cargar() {
     setLoading(true)
-    const [{ data: s }, { data: ords }, { data: sis }] = await Promise.all([
+    const [{ data: s }, { data: sis }] = await Promise.all([
       supabase.from('pd_solicitudes').select('*, pd_clientes(id, razon_social), pd_sistemas(id, nombre, color)').eq('id', id).single(),
-      supabase.from('pd_orden_solicitud').select('pd_ordenes(id, numero, titulo, estado)').eq('solicitud_id', id),
       supabase.from('pd_sistemas').select('id, nombre').eq('activo', true).order('nombre'),
     ])
     setSol(s)
-    setOrdenes((ords ?? []).map(x => x.pd_ordenes).filter(Boolean))
     setSistemas(sis ?? [])
     setLoading(false)
   }
@@ -119,34 +116,6 @@ export default function SolicitudDetalle() {
             </Link>
           )}
         </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-4">
-          <p className="font-semibold text-sm text-gray-900 dark:text-white mb-3 flex items-center gap-2"><ClipboardList size={14} />Órdenes de trabajo</p>
-          {ordenes.length === 0 ? (
-            <p className="text-sm text-gray-500 text-center py-3">Sin órdenes vinculadas.</p>
-          ) : (
-            <div className="space-y-2">
-              {ordenes.map(o => (
-                <Link key={o.id} to={`/ordenes/${o.id}`} className="block border border-gray-100 rounded-md p-3 active:bg-gray-50">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400">#{o.numero}</span>
-                    <span className="text-xs text-gray-500">{o.estado}</span>
-                  </div>
-                  <p className="text-sm text-gray-900 dark:text-white">{o.titulo}</p>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {(perfil.rol === 'admin' || perfil.rol === 'desarrollador') && sol.estado !== 'rechazado' && (
-          <button
-            onClick={() => navigate(`/ordenes/nueva?solicitud=${sol.id}`)}
-            className="w-full py-2.5 rounded-md border border-emerald-200 text-emerald-600 text-sm font-medium flex items-center justify-center gap-2 active:bg-emerald-50"
-          >
-            <ClipboardList size={15} />Generar orden de trabajo
-          </button>
-        )}
 
         <p className="text-xs text-gray-400 text-center">Creada {format(new Date(sol.created_at), 'dd/MM/yy HH:mm')}</p>
       </div>

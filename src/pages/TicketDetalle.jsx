@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth, puedeBorrarTicket } from '../lib/auth'
-import { ArrowLeft, Send, Tag, Trash2, MessageCircle, User, Clock, Building2, ClipboardList, CheckCircle2, RotateCcw, ArrowRightLeft } from 'lucide-react'
+import { ArrowLeft, Send, Tag, Trash2, MessageCircle, User, Clock, Building2, CheckCircle2, RotateCcw, ArrowRightLeft } from 'lucide-react'
 import { linkWhatsApp, formatearTelefonoPY } from '../lib/phone'
 import Adjuntos from '../components/Adjuntos'
 import CambiarTipoModal from '../components/CambiarTipoModal'
@@ -278,14 +278,6 @@ export default function TicketDetalle() {
           </form>
         </div>
 
-        {(perfil.rol === 'admin' || perfil.rol === 'desarrollador') && (
-          <button
-            onClick={() => navigate(`/ordenes/nueva?ticket=${ticket.id}`)}
-            className="w-full py-2.5 rounded-md border border-emerald-200 text-emerald-600 text-sm font-medium flex items-center justify-center gap-2 active:bg-emerald-50"
-          >
-            <ClipboardList size={15} />Generar orden de trabajo
-          </button>
-        )}
 
         <p className="text-xs text-gray-400 text-center">
           Creado {format(new Date(ticket.created_at), 'dd/MM/yy HH:mm')}

@@ -17,7 +17,7 @@ export default function CambiarTipoModal({ tipoActual, registro, onClose }) {
   const [confirmando, setConfirmando] = useState(false)
   const [error, setError] = useState(null)
 
-  const opciones = Object.keys(TIPOS).filter(t => t !== tipoActual)
+  const opciones = Object.keys(TIPOS).filter(t => t !== tipoActual && t !== 'orden')
 
   async function ejecutar() {
     if (!destino) return

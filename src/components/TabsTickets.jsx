@@ -3,7 +3,6 @@ import { NavLink } from 'react-router-dom'
 const tabs = [
   { to: '/tickets',     label: 'Soporte'     },
   { to: '/solicitudes', label: 'Solicitudes' },
-  { to: '/ordenes',     label: 'Órdenes'     },
 ]
 
 export default function TabsTickets() {

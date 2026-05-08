@@ -20,9 +20,6 @@ const TicketDetalle     = lazy(() => import('./pages/TicketDetalle'))
 const Solicitudes       = lazy(() => import('./pages/Solicitudes'))
 const NuevaSolicitud    = lazy(() => import('./pages/NuevaSolicitud'))
 const SolicitudDetalle  = lazy(() => import('./pages/SolicitudDetalle'))
-const Ordenes           = lazy(() => import('./pages/Ordenes'))
-const NuevaOrden        = lazy(() => import('./pages/NuevaOrden'))
-const OrdenDetalle      = lazy(() => import('./pages/OrdenDetalle'))
 const Dashboard         = lazy(() => import('./pages/Dashboard'))
 const Sistemas          = lazy(() => import('./pages/Sistemas'))
 const SistemaDetalle    = lazy(() => import('./pages/SistemaDetalle'))
@@ -72,9 +69,6 @@ function AppShell() {
               <Route path="/solicitudes"         element={<Solicitudes />} />
               <Route path="/solicitudes/nueva"   element={<NuevaSolicitud />} />
               <Route path="/solicitudes/:id"     element={<SolicitudDetalle />} />
-              <Route path="/ordenes"             element={<Ordenes />} />
-              <Route path="/ordenes/nueva"       element={<NuevaOrden />} />
-              <Route path="/ordenes/:id"         element={<OrdenDetalle />} />
               <Route path="/sistemas"            element={<Sistemas />} />
               <Route path="/sistemas/:id"        element={<SistemaDetalle />} />
               <Route path="/usuarios"            element={<Usuarios />} />

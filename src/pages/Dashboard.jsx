@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { AlertCircle, Clock, CheckCircle2, Ticket as TicketIcon, TrendingUp, Building2, Tag, ClipboardList, BarChart3 } from 'lucide-react'
+import { AlertCircle, Clock, CheckCircle2, Ticket as TicketIcon, TrendingUp, Building2, Tag, BarChart3 } from 'lucide-react'
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -15,20 +15,17 @@ export default function Dashboard() {
 
     const [
       { data: tickets },
-      { data: ordenes },
       { data: solicitudes },
       { data: etq },
       { data: relEtq },
     ] = await Promise.all([
       supabase.from('pd_tickets').select('id, estado, prioridad, cliente_id, created_at, cerrado_at, pd_clientes(razon_social)'),
-      supabase.from('pd_ordenes').select('id, estado, asignado_a, created_at, terminado_at'),
       supabase.from('pd_solicitudes').select('id, estado, frecuencia, titulo, created_at'),
       supabase.from('pd_etiquetas').select('id, nombre, color'),
       supabase.from('pd_ticket_etiquetas').select('etiqueta_id, ticket_id'),
     ])
 
     const tks = tickets ?? []
-    const ords = ordenes ?? []
     const sols = solicitudes ?? []
 
     // Tiempo promedio de cierre (en horas)
@@ -74,11 +71,6 @@ export default function Dashboard() {
         cerrados:        tks.filter(t => t.estado === 'cerrado').length,
         ult30:           ult30.length,
         promedioHoras,
-      },
-      ordenes: {
-        pendiente:       ords.filter(o => o.estado === 'pendiente' || o.estado === 'backlog').length,
-        en_progreso:     ords.filter(o => o.estado === 'en_progreso').length,
-        terminado:       ords.filter(o => o.estado === 'terminado').length,
       },
       solicitudes: {
         pendientes:      sols.filter(s => s.estado === 'pendiente').length,
@@ -127,25 +119,15 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Órdenes + Solicitudes */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-4">
-            <p className="font-semibold text-sm text-gray-900 dark:text-white mb-3 flex items-center gap-2"><ClipboardList size={14} />Desarrollo</p>
-            <div className="space-y-2 text-sm">
-              <Row label="Pendientes"  value={data.ordenes.pendiente}   color="text-gray-600" />
-              <Row label="En progreso" value={data.ordenes.en_progreso} color="text-yellow-600" />
-              <Row label="Terminadas"  value={data.ordenes.terminado}   color="text-emerald-600" />
-            </div>
-          </section>
-          <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-4">
-            <p className="font-semibold text-sm text-gray-900 dark:text-white mb-3">Solicitudes</p>
-            <div className="space-y-2 text-sm">
-              <Row label="Pendientes"  value={data.solicitudes.pendientes}  color="text-gray-600" />
-              <Row label="En análisis" value={data.solicitudes.en_analisis} color="text-blue-600" />
-              <Row label="Aprobadas"   value={data.solicitudes.aprobadas}   color="text-emerald-600" />
-            </div>
-          </section>
-        </div>
+        {/* Solicitudes */}
+        <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-4">
+          <p className="font-semibold text-sm text-gray-900 dark:text-white mb-3">Solicitudes</p>
+          <div className="space-y-2 text-sm">
+            <Row label="Pendientes"  value={data.solicitudes.pendientes}  color="text-gray-600" />
+            <Row label="En análisis" value={data.solicitudes.en_analisis} color="text-blue-600" />
+            <Row label="Aprobadas"   value={data.solicitudes.aprobadas}   color="text-emerald-600" />
+          </div>
+        </section>
 
         {/* Clientes más demandantes */}
         <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-4">
