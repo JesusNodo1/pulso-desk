@@ -15,7 +15,7 @@ export default function Mas() {
 
   return (
     <div className="min-h-screen">
-      <div className="bg-white dark:bg-gray-800 px-4 pt-14 pb-4 border-b border-gray-100 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 px-4 pt-14 lg:pt-4 pb-4 border-b border-gray-100 dark:border-gray-700">
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">Más</h1>
       </div>
       <div className="p-4 space-y-3">

@@ -55,7 +55,7 @@ export default function SistemaDetalle() {
 
   return (
     <div className="min-h-screen">
-      <div className="bg-white dark:bg-gray-800 px-4 pt-14 pb-3 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3">
+      <div className="bg-white dark:bg-gray-800 px-4 pt-14 lg:pt-4 pb-3 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="p-1"><ArrowLeft size={20} /></button>
         <div className="w-3 h-8 rounded-sm flex-shrink-0" style={{ backgroundColor: sistema.color }} />
         <div className="min-w-0 flex-1">
