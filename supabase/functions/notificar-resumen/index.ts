@@ -7,21 +7,35 @@
 //
 // Destinatario = pd_usuarios_perfil.email_resumen (configurable por cada
 // usuario desde la pantalla Más). Usuarios sin email_resumen se omiten.
+// El envío real es por SMTP (Brevo/Gmail/etc.) usando BCC para preservar
+// la privacidad entre destinatarios.
 //
 // Secrets requeridos (Supabase > Edge Functions > notificar-resumen > Secrets):
 //   - SUPABASE_URL                 (auto: ya existe en Edge Functions runtime)
 //   - SUPABASE_SERVICE_ROLE_KEY    (auto: ya existe en Edge Functions runtime)
-//   - RESEND_API_KEY               (de https://resend.com/api-keys)
-//   - RESEND_FROM                  (ej: "Pulso Desk <onboarding@resend.dev>")
+//   - SMTP_HOST                    (ej: "smtp-relay.brevo.com")
+//   - SMTP_PORT                    ("587" STARTTLS o "465" TLS)
+//   - SMTP_USER                    (login SMTP)
+//   - SMTP_PASS                    (key SMTP / app password)
+//   - SMTP_FROM                    (ej: "Pulso Desk <pulso@dominio.com>")
 //   - CRON_SECRET                  (string random — el cron lo manda como Bearer)
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import { SMTPClient }  from 'https://deno.land/x/denomailer@1.6.0/mod.ts'
 
 const SUPABASE_URL              = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const RESEND_API_KEY            = Deno.env.get('RESEND_API_KEY')!
-const RESEND_FROM               = Deno.env.get('RESEND_FROM') ?? 'Pulso Desk <onboarding@resend.dev>'
+const SMTP_HOST                 = Deno.env.get('SMTP_HOST')!
+const SMTP_PORT                 = parseInt(Deno.env.get('SMTP_PORT') ?? '587', 10)
+const SMTP_USER                 = Deno.env.get('SMTP_USER')!
+const SMTP_PASS                 = Deno.env.get('SMTP_PASS')!
+const SMTP_FROM                 = Deno.env.get('SMTP_FROM')!
 const CRON_SECRET               = Deno.env.get('CRON_SECRET') ?? ''
+
+function extractEmail(addr: string): string {
+  const m = addr.match(/<([^>]+)>/)
+  return (m ? m[1] : addr).trim()
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin':  '*',
@@ -155,30 +169,37 @@ Deno.serve(async (req) => {
   </div>
 </body></html>`
 
-  // 4. Enviar via Resend
+  // 4. Enviar via SMTP (BCC para preservar privacidad entre destinatarios)
   const fechaCorta = new Date().toLocaleDateString('es-PY', {
     timeZone: 'America/Asuncion',
     day:   '2-digit',
     month: 'short',
   })
 
-  const r = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${RESEND_API_KEY}`,
-      'Content-Type':  'application/json',
+  const fromEmail = extractEmail(SMTP_FROM)
+  const client = new SMTPClient({
+    connection: {
+      hostname: SMTP_HOST,
+      port:     SMTP_PORT,
+      tls:      SMTP_PORT === 465,
+      auth:     { username: SMTP_USER, password: SMTP_PASS },
     },
-    body: JSON.stringify({
-      from:    RESEND_FROM,
-      to:      emails,
-      subject: `Pulso Desk · Resumen ${fechaCorta}`,
-      html,
-    }),
   })
 
-  if (!r.ok) {
-    return json({ error: await r.text() }, 500)
+  try {
+    await client.send({
+      from:    SMTP_FROM,
+      to:      fromEmail,
+      bcc:     emails,
+      subject: `Pulso Desk · Resumen ${fechaCorta}`,
+      content: 'auto',
+      html,
+    })
+  } catch (e) {
+    try { await client.close() } catch (_) { /* ignore */ }
+    return json({ error: 'smtp_send_failed', detail: String(e?.message ?? e) }, 500)
   }
+  try { await client.close() } catch (_) { /* ignore */ }
 
   return json({ ok: true, modo, recipients: emails.length, stats })
 })
