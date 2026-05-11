@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
-import { ArrowLeft, Save, Ticket, Lightbulb } from 'lucide-react'
+import { ArrowLeft, Save, Ticket, Lightbulb, Paperclip, Plus, X, ExternalLink } from 'lucide-react'
+import { detectarAdjunto, validarUrl, insertarAdjuntos } from '../lib/adjuntos'
 
 export default function NuevoTicket() {
   const navigate    = useNavigate()
@@ -19,6 +20,10 @@ export default function NuevoTicket() {
   const [sistemas, setSistemas]     = useState([])
   const [guardando, setGuardando]   = useState(false)
   const [error, setError]           = useState('')
+  const [adjuntos, setAdjuntos]     = useState([])    // staging local: [{ url, descripcion }]
+  const [adjUrl, setAdjUrl]         = useState('')
+  const [adjDesc, setAdjDesc]       = useState('')
+  const [adjError, setAdjError]     = useState('')
   const [form, setForm] = useState({
     titulo:        '',
     descripcion:   '',
@@ -64,6 +69,8 @@ export default function NuevoTicket() {
       }
       const { data, error: err } = await supabase.from('pd_tickets').insert(payload).select().single()
       if (err) { setError(err.message); setGuardando(false); return }
+      const { error: errAdj } = await insertarAdjuntos('ticket', data.id, adjuntos, perfil.id)
+      if (errAdj) { setError(`Ticket creado pero falló al guardar adjuntos: ${errAdj.message}`); setGuardando(false); return }
       navigate(`/tickets/${data.id}`, { replace: true })
     } else {
       const payload = {
@@ -77,8 +84,21 @@ export default function NuevoTicket() {
       }
       const { data, error: err } = await supabase.from('pd_solicitudes').insert(payload).select().single()
       if (err) { setError(err.message); setGuardando(false); return }
+      const { error: errAdj } = await insertarAdjuntos('solicitud', data.id, adjuntos, perfil.id)
+      if (errAdj) { setError(`Solicitud creada pero falló al guardar adjuntos: ${errAdj.message}`); setGuardando(false); return }
       navigate(`/solicitudes/${data.id}`, { replace: true })
     }
+  }
+
+  function agregarAdjunto() {
+    setAdjError('')
+    if (!validarUrl(adjUrl)) { setAdjError('URL inválida (http:// o https://)'); return }
+    setAdjuntos(a => [...a, { url: adjUrl.trim(), descripcion: adjDesc.trim() }])
+    setAdjUrl(''); setAdjDesc('')
+  }
+
+  function quitarAdjunto(i) {
+    setAdjuntos(a => a.filter((_, idx) => idx !== i))
   }
 
   const esTicket = tipoForm === 'ticket'
@@ -196,6 +216,63 @@ export default function NuevoTicket() {
                 </Campo>
               </div>
             </>
+          )}
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-4">
+          <p className="font-semibold text-sm text-gray-900 dark:text-white flex items-center gap-2 mb-2">
+            <Paperclip size={14} />Adjuntos
+            <span className="text-xs text-gray-400 font-normal">({adjuntos.length})</span>
+          </p>
+          <p className="text-xs text-gray-500 mb-3">Pegá links de Drive, Fotos, Loom, YouTube, etc.</p>
+
+          <div className="space-y-2 mb-3">
+            <input
+              type="url"
+              value={adjUrl}
+              onChange={e => setAdjUrl(e.target.value)}
+              placeholder="https://drive.google.com/..."
+              className={inputCls}
+            />
+            <input
+              type="text"
+              value={adjDesc}
+              onChange={e => setAdjDesc(e.target.value)}
+              placeholder="Descripción corta (opcional)"
+              className={inputCls}
+            />
+            {adjError && <p className="text-xs text-red-600">{adjError}</p>}
+            <button
+              type="button"
+              onClick={agregarAdjunto}
+              disabled={!adjUrl.trim()}
+              className="w-full py-2 rounded-md border border-emerald-200 text-emerald-600 text-sm font-medium flex items-center justify-center gap-1 disabled:opacity-50"
+            >
+              <Plus size={14} />Sumar a la lista
+            </button>
+          </div>
+
+          {adjuntos.length > 0 && (
+            <div className="space-y-2 border-t border-gray-100 dark:border-gray-700 pt-3">
+              {adjuntos.map((a, i) => {
+                const meta = detectarAdjunto(a.url)
+                return (
+                  <div key={i} className="flex items-start gap-3 border border-gray-100 dark:border-gray-700 rounded-md p-2.5">
+                    <div className={`${meta.color ?? 'bg-gray-100 text-gray-700'} w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0`}>
+                      {meta.icono ?? '🔗'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${meta.color ?? 'bg-gray-100 text-gray-700'}`}>{meta.label}</span>
+                      {a.descripcion && <p className="text-sm text-gray-900 dark:text-gray-100 mt-0.5">{a.descripcion}</p>}
+                      <p className="text-xs text-gray-500 break-all flex items-center gap-1"><ExternalLink size={10} />{a.url}</p>
+                    </div>
+                    <button type="button" onClick={() => quitarAdjunto(i)} className="p-1 text-red-500 flex-shrink-0">
+                      <X size={14} />
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
           )}
         </div>
 

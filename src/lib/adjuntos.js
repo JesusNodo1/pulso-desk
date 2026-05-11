@@ -1,5 +1,28 @@
+import { supabase } from './supabase'
+
 // Detecta el tipo de adjunto por su URL y devuelve metadata para el preview
 // Tipos soportados: drive, youtube, loom, whatsapp, imgur, foto, link
+
+const COLUMNA_POR_TIPO = {
+  ticket:    'ticket_id',
+  solicitud: 'solicitud_id',
+  orden:     'orden_id',
+}
+
+// Inserta múltiples adjuntos vinculados a un registro recién creado.
+// items: [{ url, descripcion }]
+export async function insertarAdjuntos(tipo, id, items, perfilId) {
+  if (!items?.length) return { error: null }
+  const columna = COLUMNA_POR_TIPO[tipo]
+  if (!columna) return { error: new Error(`Tipo desconocido: ${tipo}`) }
+  const payload = items.map(it => ({
+    [columna]:   id,
+    url:         it.url.trim(),
+    descripcion: it.descripcion?.trim() || null,
+    creado_por:  perfilId,
+  }))
+  return supabase.from('pd_adjuntos').insert(payload)
+}
 
 export function detectarAdjunto(url) {
   if (!url) return { tipo: 'link', label: 'Link' }

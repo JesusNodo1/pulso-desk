@@ -4,8 +4,14 @@ import { useAuth } from '../lib/auth'
 import { detectarAdjunto, validarUrl } from '../lib/adjuntos'
 import { Paperclip, Plus, ExternalLink, Trash2, X } from 'lucide-react'
 
-// Componente reutilizable para tickets y órdenes
-// Props: tipo ('ticket' | 'orden'), id (uuid del ticket o orden)
+// Componente reutilizable para tickets, solicitudes y órdenes
+// Props: tipo ('ticket' | 'solicitud' | 'orden'), id (uuid del registro)
+const COLUMNA_POR_TIPO = {
+  ticket:    'ticket_id',
+  solicitud: 'solicitud_id',
+  orden:     'orden_id',
+}
+
 export default function Adjuntos({ tipo, id }) {
   const { perfil } = useAuth()
   const [lista, setLista]     = useState([])
@@ -15,7 +21,7 @@ export default function Adjuntos({ tipo, id }) {
   const [descripcion, setDesc]    = useState('')
   const [error, setError]         = useState('')
 
-  const columna = tipo === 'ticket' ? 'ticket_id' : 'orden_id'
+  const columna = COLUMNA_POR_TIPO[tipo]
 
   useEffect(() => { cargar() }, [id])
 

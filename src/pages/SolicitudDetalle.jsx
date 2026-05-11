@@ -5,6 +5,7 @@ import { useAuth } from '../lib/auth'
 import { ArrowLeft, Trash2, Building2, ArrowRightLeft } from 'lucide-react'
 import { format } from 'date-fns'
 import CambiarTipoModal from '../components/CambiarTipoModal'
+import Adjuntos from '../components/Adjuntos'
 
 const ESTADOS = [
   { value: 'pendiente',    label: '⏳ Pendiente'    },
@@ -116,6 +117,8 @@ export default function SolicitudDetalle() {
             </Link>
           )}
         </div>
+
+        <Adjuntos tipo="solicitud" id={sol.id} />
 
         <p className="text-xs text-gray-400 text-center">Creada {format(new Date(sol.created_at), 'dd/MM/yy HH:mm')}</p>
       </div>
