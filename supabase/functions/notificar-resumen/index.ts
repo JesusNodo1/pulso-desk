@@ -7,34 +7,32 @@
 //
 // Destinatario = pd_usuarios_perfil.email_resumen (configurable por cada
 // usuario desde la pantalla Más). Usuarios sin email_resumen se omiten.
-// El envío real es por SMTP (Brevo/Gmail/etc.) usando BCC para preservar
-// la privacidad entre destinatarios.
+// El envío real es por la API HTTP de Brevo (https://api.brevo.com/v3/smtp/email)
+// usando BCC para preservar la privacidad entre destinatarios.
 //
 // Secrets requeridos (Supabase > Edge Functions > notificar-resumen > Secrets):
 //   - SUPABASE_URL                 (auto: ya existe en Edge Functions runtime)
 //   - SUPABASE_SERVICE_ROLE_KEY    (auto: ya existe en Edge Functions runtime)
-//   - SMTP_HOST                    (ej: "smtp-relay.brevo.com")
-//   - SMTP_PORT                    ("587" STARTTLS o "465" TLS)
-//   - SMTP_USER                    (login SMTP)
-//   - SMTP_PASS                    (key SMTP / app password)
-//   - SMTP_FROM                    (ej: "Pulso Desk <pulso@dominio.com>")
+//   - BREVO_API_KEY                (xkeysib-... de https://app.brevo.com/settings/keys/api)
+//   - MAIL_FROM                    (ej: "Pulso Desk <pulso@dominio.com>" — el email debe
+//                                   estar verificado como Sender en Brevo)
 //   - CRON_SECRET                  (string random — el cron lo manda como Bearer)
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
-import { SMTPClient }  from 'https://deno.land/x/denomailer@1.6.0/mod.ts'
 
 const SUPABASE_URL              = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const SMTP_HOST                 = Deno.env.get('SMTP_HOST')!
-const SMTP_PORT                 = parseInt(Deno.env.get('SMTP_PORT') ?? '587', 10)
-const SMTP_USER                 = Deno.env.get('SMTP_USER')!
-const SMTP_PASS                 = Deno.env.get('SMTP_PASS')!
-const SMTP_FROM                 = Deno.env.get('SMTP_FROM')!
+const BREVO_API_KEY             = Deno.env.get('BREVO_API_KEY')!
+const MAIL_FROM                 = Deno.env.get('MAIL_FROM')!
 const CRON_SECRET               = Deno.env.get('CRON_SECRET') ?? ''
 
-function extractEmail(addr: string): string {
-  const m = addr.match(/<([^>]+)>/)
-  return (m ? m[1] : addr).trim()
+function parseFrom(addr: string): { name?: string; email: string } {
+  const m = addr.match(/^\s*(.*?)\s*<([^>]+)>\s*$/)
+  if (m) {
+    const name = m[1].replace(/^"|"$/g, '').trim()
+    return name ? { name, email: m[2].trim() } : { email: m[2].trim() }
+  }
+  return { email: addr.trim() }
 }
 
 const corsHeaders = {
@@ -169,37 +167,33 @@ Deno.serve(async (req) => {
   </div>
 </body></html>`
 
-  // 4. Enviar via SMTP (BCC para preservar privacidad entre destinatarios)
+  // 4. Enviar via Brevo HTTP API (BCC para no exponer destinatarios entre sí)
   const fechaCorta = new Date().toLocaleDateString('es-PY', {
     timeZone: 'America/Asuncion',
     day:   '2-digit',
     month: 'short',
   })
 
-  const fromEmail = extractEmail(SMTP_FROM)
-  const client = new SMTPClient({
-    connection: {
-      hostname: SMTP_HOST,
-      port:     SMTP_PORT,
-      tls:      SMTP_PORT === 465,
-      auth:     { username: SMTP_USER, password: SMTP_PASS },
+  const sender = parseFrom(MAIL_FROM)
+  const r = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'api-key':       BREVO_API_KEY,
+      'Content-Type':  'application/json',
+      'Accept':        'application/json',
     },
+    body: JSON.stringify({
+      sender,
+      to:          [{ email: sender.email }],
+      bcc:         emails.map(e => ({ email: e })),
+      subject:     `Pulso Desk · Resumen ${fechaCorta}`,
+      htmlContent: html,
+    }),
   })
 
-  try {
-    await client.send({
-      from:    SMTP_FROM,
-      to:      fromEmail,
-      bcc:     emails,
-      subject: `Pulso Desk · Resumen ${fechaCorta}`,
-      content: 'auto',
-      html,
-    })
-  } catch (e) {
-    try { await client.close() } catch (_) { /* ignore */ }
-    return json({ error: 'smtp_send_failed', detail: String(e?.message ?? e) }, 500)
+  if (!r.ok) {
+    return json({ error: 'brevo_send_failed', status: r.status, detail: await r.text() }, 500)
   }
-  try { await client.close() } catch (_) { /* ignore */ }
 
   return json({ ok: true, modo, recipients: emails.length, stats })
 })
