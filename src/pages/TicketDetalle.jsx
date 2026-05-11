@@ -22,6 +22,13 @@ const PRIO_OPCIONES = [
   { value: 'alta',  label: '🔴 Alta'  },
 ]
 
+const TIPO_OPCIONES = [
+  { value: 'soporte_tecnico', label: '🛠 Soporte'   },
+  { value: 'incidente',       label: '⚠️ Incidente' },
+  { value: 'consulta',        label: '💡 Consulta'  },
+  { value: 'peticion',        label: '🙋 Petición'  },
+]
+
 export default function TicketDetalle() {
   const { id }     = useParams()
   const navigate   = useNavigate()
@@ -173,7 +180,7 @@ export default function TicketDetalle() {
         )}
 
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-4 space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <Campo label="Estado">
               <select value={ticket.estado} onChange={e => cambiar('estado', e.target.value)} className={inputCls} disabled={guardando}>
                 {ESTADO_OPCIONES.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -182,6 +189,11 @@ export default function TicketDetalle() {
             <Campo label="Prioridad">
               <select value={ticket.prioridad} onChange={e => cambiar('prioridad', e.target.value)} className={inputCls} disabled={guardando}>
                 {PRIO_OPCIONES.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </Campo>
+            <Campo label="Tipo">
+              <select value={ticket.tipo} onChange={e => cambiar('tipo', e.target.value)} className={inputCls} disabled={guardando}>
+                {TIPO_OPCIONES.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </Campo>
           </div>

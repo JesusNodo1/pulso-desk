@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { AlertCircle, Clock, CheckCircle2, Ticket as TicketIcon, TrendingUp, Building2, Tag, BarChart3 } from 'lucide-react'
 
-const TIPO_LABEL = { soporte_tecnico: 'Soporte', incidente: 'Incidente', consulta: 'Consulta' }
+const TIPO_LABEL = { soporte_tecnico: 'Soporte', incidente: 'Incidente', consulta: 'Consulta', peticion: 'Petición' }
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -75,6 +75,7 @@ export default function Dashboard() {
         soporte:   tks.filter(t => t.tipo === 'soporte_tecnico').length,
         incidente: tks.filter(t => t.tipo === 'incidente').length,
         consulta:  tks.filter(t => t.tipo === 'consulta').length,
+        peticion:  tks.filter(t => t.tipo === 'peticion').length,
       },
       topClientes,
       topEtiquetas,
@@ -125,6 +126,7 @@ export default function Dashboard() {
             <Row label="Soporte"   value={data.porTipo.soporte}   color="text-emerald-600" />
             <Row label="Incidente" value={data.porTipo.incidente} color="text-red-600" />
             <Row label="Consulta"  value={data.porTipo.consulta}  color="text-amber-600" />
+            <Row label="Petición"  value={data.porTipo.peticion}  color="text-violet-600" />
           </div>
         </section>
 

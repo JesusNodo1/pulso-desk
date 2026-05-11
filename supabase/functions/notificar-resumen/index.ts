@@ -109,6 +109,7 @@ Deno.serve(async (req) => {
     soporte:        tickets.filter(t => t.tipo === 'soporte_tecnico' && t.estado !== 'cerrado').length,
     incidente:      tickets.filter(t => t.tipo === 'incidente'        && t.estado !== 'cerrado').length,
     consulta:       tickets.filter(t => t.tipo === 'consulta'         && t.estado !== 'cerrado').length,
+    peticion:       tickets.filter(t => t.tipo === 'peticion'         && t.estado !== 'cerrado').length,
   }
 
   // 3. HTML
@@ -144,6 +145,7 @@ Deno.serve(async (req) => {
       <tr style="background:#ecfdf5"><td>🛠 Soporte</td><td align="right"><b>${stats.soporte}</b></td></tr>
       <tr><td>⚠️ Incidente</td><td align="right"><b>${stats.incidente}</b></td></tr>
       <tr style="background:#fef3c7"><td>💡 Consulta</td><td align="right"><b>${stats.consulta}</b></td></tr>
+      <tr><td>🙋 Petición</td><td align="right"><b>${stats.peticion}</b></td></tr>
     </table>
 
     ${masViejos.length > 0 ? `

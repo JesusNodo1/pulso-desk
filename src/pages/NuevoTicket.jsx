@@ -125,6 +125,7 @@ export default function NuevoTicket() {
                 <option value="soporte_tecnico">Soporte</option>
                 <option value="incidente">Incidente</option>
                 <option value="consulta">Consulta</option>
+                <option value="peticion">Petición</option>
               </select>
             </Campo>
             <Campo label="Prioridad">

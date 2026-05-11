@@ -17,7 +17,7 @@ const PRIO_CFG = {
   baja:  { bg: 'bg-gray-50',   text: 'text-gray-600',   emoji: '⚪' },
 }
 
-const TIPO_LABEL = { soporte_tecnico: 'Soporte', incidente: 'Incidente', consulta: 'Consulta' }
+const TIPO_LABEL = { soporte_tecnico: 'Soporte', incidente: 'Incidente', consulta: 'Consulta', peticion: 'Petición' }
 
 const FILTROS = [
   { value: 'activos',           label: 'Activos'     },

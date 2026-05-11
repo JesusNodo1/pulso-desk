@@ -15,16 +15,18 @@ const ESTADO_FILTROS = [
 ]
 
 const TIPO_FILTROS = [
-  { value: 'todos',          label: 'Todos los tipos' },
-  { value: 'soporte_tecnico', label: 'Soporte'        },
-  { value: 'incidente',      label: 'Incidente'       },
-  { value: 'consulta',       label: 'Consulta'        },
+  { value: 'todos',           label: 'Todos los tipos' },
+  { value: 'soporte_tecnico', label: 'Soporte'         },
+  { value: 'incidente',       label: 'Incidente'       },
+  { value: 'consulta',        label: 'Consulta'        },
+  { value: 'peticion',        label: 'Petición'        },
 ]
 
 const TIPO_LABEL = {
   soporte_tecnico: 'Soporte',
   incidente:       'Incidente',
   consulta:        'Consulta',
+  peticion:        'Petición',
 }
 
 const ESTADO_CFG = {
