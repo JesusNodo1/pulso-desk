@@ -45,20 +45,30 @@ const PRIO_CFG = {
 export default function Tickets() {
   const navigate = useNavigate()
   const { perfil } = useAuth()
-  const [tickets, setTickets]       = useState([])
-  const [filtro, setFiltro]         = useState('abiertos')
-  const [filtroTipo, setFiltroTipo] = useState('todos')
-  const [busqueda, setBusqueda]     = useState('')
-  const [loading, setLoading]       = useState(true)
+  const [tickets, setTickets]         = useState([])
+  const [usuarios, setUsuarios]       = useState([])
+  const [filtro, setFiltro]           = useState('abiertos')
+  const [filtroTipo, setFiltroTipo]   = useState('todos')
+  const [filtroUsuario, setFiltroUsuario] = useState('todos')
+  const [busqueda, setBusqueda]       = useState('')
+  const [loading, setLoading]         = useState(true)
 
   useEffect(() => { cargar() }, [])
 
   async function cargar() {
-    const { data } = await supabase
-      .from('pd_tickets')
-      .select('id, numero, titulo, tipo, estado, prioridad, created_at, pd_clientes(razon_social)')
-      .order('created_at', { ascending: false })
-    setTickets(data ?? [])
+    const [{ data: tks }, { data: us }] = await Promise.all([
+      supabase
+        .from('pd_tickets')
+        .select('id, numero, titulo, tipo, estado, prioridad, asignado_a, created_at, pd_clientes(razon_social)')
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('pd_usuarios_perfil')
+        .select('id, nombre')
+        .eq('activo', true)
+        .order('nombre'),
+    ])
+    setTickets(tks ?? [])
+    setUsuarios(us ?? [])
     setLoading(false)
   }
 
@@ -70,6 +80,12 @@ export default function Tickets() {
       return t.estado === filtro
     })
     .filter(t => filtroTipo === 'todos' ? true : t.tipo === filtroTipo)
+    .filter(t => {
+      if (filtroUsuario === 'todos')       return true
+      if (filtroUsuario === 'mios')        return t.asignado_a === perfil.id
+      if (filtroUsuario === 'sin_asignar') return !t.asignado_a
+      return t.asignado_a === filtroUsuario
+    })
     .filter(t => {
       if (!busqueda) return true
       if (t.titulo.toLowerCase().includes(q)) return true
@@ -137,6 +153,21 @@ export default function Tickets() {
               {f.label}
             </button>
           ))}
+        </div>
+        <div className="mt-2">
+          <select
+            value={filtroUsuario}
+            onChange={e => setFiltroUsuario(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md text-sm bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+            <option value="todos">👥 Todos los usuarios</option>
+            <option value="mios">⭐ Mis tickets</option>
+            <option value="sin_asignar">— Sin asignar —</option>
+            {usuarios.length > 0 && <option disabled>──────────</option>}
+            {usuarios.map(u => (
+              <option key={u.id} value={u.id}>{u.nombre}</option>
+            ))}
+          </select>
         </div>
       </div>
 

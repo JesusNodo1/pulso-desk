@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth, puedeEscribirClientes, puedeCrearTickets } from '../lib/auth'
-import { ArrowLeft, MessageCircle, Plus, Trash2, Pencil, Save, X, Ticket as TicketIcon } from 'lucide-react'
+import { ArrowLeft, MessageCircle, Plus, Trash2, Pencil, Save, X, Ticket as TicketIcon, Download } from 'lucide-react'
 import { linkWhatsApp, formatearTelefonoPY } from '../lib/phone'
 import { format } from 'date-fns'
 
@@ -11,6 +11,27 @@ const ESTADO_TICKET = {
   en_proceso:        { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'En proceso' },
   esperando_cliente: { bg: 'bg-blue-100',   text: 'text-blue-700',   label: 'Esperando cliente' },
   cerrado:           { bg: 'bg-gray-100',   text: 'text-gray-500',   label: 'Cerrado' },
+}
+
+const ETIQUETA_TIPO = {
+  soporte_tecnico: 'Soporte',
+  incidente:       'Incidente',
+  consulta:        'Consulta',
+  peticion:        'Petición',
+}
+
+const ETIQUETA_PRIO = {
+  baja:  'Baja',
+  media: 'Media',
+  alta:  'Alta',
+}
+
+function escaparCsv(val) {
+  const s = String(val ?? '')
+  if (s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')) {
+    return '"' + s.replace(/"/g, '""') + '"'
+  }
+  return s
 }
 
 export default function ClienteDetalle() {
@@ -24,6 +45,7 @@ export default function ClienteDetalle() {
   const [editando, setEditando]   = useState(false)
   const [form, setForm]           = useState(null)
   const [nuevoContacto, setNuevoContacto] = useState(null)
+  const [exportando, setExportando] = useState(false)
 
   useEffect(() => { cargar() }, [id])
 
@@ -45,6 +67,54 @@ export default function ClienteDetalle() {
     await supabase.from('pd_clientes').update({ razon_social, rubro, estado, ruc, direccion, notas }).eq('id', id)
     setEditando(false)
     cargar()
+  }
+
+  async function exportarCSV() {
+    setExportando(true)
+    try {
+      const { data: tks, error } = await supabase
+        .from('pd_tickets')
+        .select('numero, titulo, estado, prioridad, tipo, descripcion, asignado_a, created_at, cerrado_at')
+        .eq('cliente_id', id)
+        .order('created_at', { ascending: false })
+
+      if (error) { alert('Error al exportar: ' + error.message); return }
+      if (!tks || tks.length === 0) { alert('Este cliente no tiene tickets para exportar.'); return }
+
+      const ids = [...new Set(tks.map(t => t.asignado_a).filter(Boolean))]
+      let nombres = {}
+      if (ids.length) {
+        const { data: us } = await supabase.from('pd_usuarios_perfil').select('id, nombre').in('id', ids)
+        nombres = Object.fromEntries((us ?? []).map(u => [u.id, u.nombre]))
+      }
+
+      const headers = ['Número', 'Título', 'Tipo', 'Estado', 'Prioridad', 'Asignado a', 'Creado', 'Cerrado', 'Descripción']
+      const rows = tks.map(t => [
+        t.numero,
+        t.titulo,
+        ETIQUETA_TIPO[t.tipo] ?? t.tipo,
+        ESTADO_TICKET[t.estado]?.label ?? t.estado,
+        ETIQUETA_PRIO[t.prioridad] ?? t.prioridad,
+        t.asignado_a ? (nombres[t.asignado_a] ?? '') : 'Sin asignar',
+        format(new Date(t.created_at), 'dd/MM/yyyy HH:mm'),
+        t.cerrado_at ? format(new Date(t.cerrado_at), 'dd/MM/yyyy HH:mm') : '',
+        t.descripcion ?? '',
+      ])
+
+      const csv = [headers, ...rows].map(r => r.map(escaparCsv).join(',')).join('\r\n')
+      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
+      const fecha = format(new Date(), 'yyyy-MM-dd')
+      const slug = (cliente.razon_social ?? 'cliente').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `tickets-${slug}-${fecha}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(a.href)
+    } finally {
+      setExportando(false)
+    }
   }
 
   async function borrarContacto(cid) {
@@ -158,13 +228,20 @@ export default function ClienteDetalle() {
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-4">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-3 gap-2">
             <p className="font-semibold text-gray-900 dark:text-white text-sm">Historial de tickets</p>
-            {puedeCrearTickets(perfil.rol) && (
-              <button onClick={() => navigate(`/tickets/nuevo?cliente=${id}`)} className="flex items-center gap-1 text-emerald-600 text-sm">
-                <Plus size={14} />Ticket
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {tickets.length > 0 && (
+                <button onClick={exportarCSV} disabled={exportando} className="flex items-center gap-1 text-gray-600 dark:text-gray-300 text-sm disabled:opacity-50" title="Exportar tickets a CSV">
+                  <Download size={14} />{exportando ? 'Exportando...' : 'Exportar'}
+                </button>
+              )}
+              {puedeCrearTickets(perfil.rol) && (
+                <button onClick={() => navigate(`/tickets/nuevo?cliente=${id}`)} className="flex items-center gap-1 text-emerald-600 text-sm">
+                  <Plus size={14} />Ticket
+                </button>
+              )}
+            </div>
           </div>
           <div className="space-y-2">
             {tickets.length === 0 && (
