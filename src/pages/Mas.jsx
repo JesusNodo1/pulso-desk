@@ -135,10 +135,10 @@ export default function Mas() {
 
   return (
     <div className="min-h-screen">
-      <div className="bg-white dark:bg-gray-800 px-4 pt-14 pb-4 border-b border-gray-100 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 px-4 pt-14 lg:pt-4 pb-4 border-b border-gray-100 dark:border-gray-700">
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">Más</h1>
       </div>
-      <div className="p-4 space-y-3">
+      <div className="p-4 space-y-3 max-w-3xl mx-auto">
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-4">
           <p className="text-xs text-gray-400">Sesión activa</p>
           <p className="font-semibold text-gray-900 dark:text-white">{perfil.nombre}</p>

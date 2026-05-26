@@ -130,7 +130,7 @@ export default function TicketDetalle() {
 
   return (
     <div className="min-h-screen">
-      <div className="bg-white dark:bg-gray-800 px-4 pt-14 pb-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between gap-3">
+      <div className="bg-white dark:bg-gray-800 px-4 pt-14 lg:pt-4 pb-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <button onClick={() => navigate(-1)} className="p-1"><ArrowLeft size={20} /></button>
           <div className="min-w-0">
@@ -150,11 +150,15 @@ export default function TicketDetalle() {
         </div>
       </div>
 
+<<<<<<< HEAD
       {cambiarTipo && (
         <CambiarTipoModal tipoActual="ticket" registro={ticket} onClose={() => setCambiarTipo(false)} />
       )}
 
       <div className="p-4 space-y-4">
+=======
+      <div className="p-4 space-y-4 max-w-4xl mx-auto">
+>>>>>>> cf793a89ee7d13cd6866582acf3911289306014f
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-md p-3 text-xs text-red-700">
             {error}

@@ -86,12 +86,12 @@ export default function NuevoTicket() {
 
   return (
     <div className="min-h-screen">
-      <div className="bg-white dark:bg-gray-800 px-4 pt-14 pb-3 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3">
+      <div className="bg-white dark:bg-gray-800 px-4 pt-14 lg:pt-4 pb-3 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3">
         <button onClick={() => navigate(-1)} className="p-1"><ArrowLeft size={20} /></button>
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">Nuevo ticket</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-4 space-y-4">
+      <form onSubmit={handleSubmit} className="p-4 space-y-4 max-w-3xl mx-auto">
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-4 space-y-3">
           <Campo label="Cliente">
             <select value={form.cliente_id} onChange={e => setForm(f => ({ ...f, cliente_id: e.target.value, contacto_id: '' }))} className={inputCls}>

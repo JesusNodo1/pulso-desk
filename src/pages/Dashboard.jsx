@@ -93,7 +93,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen">
-      <div className="bg-cyan-600 px-4 pt-12 pb-5 relative overflow-hidden">
+      <div className="bg-cyan-600 px-4 pt-12 lg:pt-6 pb-5 relative overflow-hidden">
         <div className="absolute -right-4 -top-2 opacity-15 pointer-events-none">
           <BarChart3 size={110} color="white" strokeWidth={1.5} />
         </div>

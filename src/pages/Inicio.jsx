@@ -56,7 +56,7 @@ export default function Inicio() {
 
   return (
     <div className="min-h-screen">
-      <div className="bg-sky-600 px-4 pt-12 pb-5 relative overflow-hidden">
+      <div className="bg-sky-600 px-4 pt-12 lg:pt-6 pb-5 relative overflow-hidden">
         <div className="absolute -right-4 -top-2 opacity-15 pointer-events-none">
           <Activity size={110} color="white" strokeWidth={1.5} />
         </div>
@@ -82,7 +82,11 @@ export default function Inicio() {
             No tenés tickets asignados.
           </div>
         )}
+<<<<<<< HEAD
         <div className="space-y-2 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-2 lg:space-y-0">
+=======
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+>>>>>>> cf793a89ee7d13cd6866582acf3911289306014f
           {mios.map(t => {
             const prio = PRIO_CONFIG[t.prioridad] ?? PRIO_CONFIG.media
             return (
