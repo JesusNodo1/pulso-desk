@@ -150,7 +150,7 @@ export default function OrdenDetalle() {
         )}
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 max-w-4xl mx-auto">
         {/* Barra de edad + vencimiento */}
         <div className="flex items-center gap-2 flex-wrap">
           <span className={`text-sm px-3 py-1.5 rounded-md bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 ${colorD}`}>

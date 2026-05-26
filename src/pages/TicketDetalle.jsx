@@ -134,7 +134,7 @@ export default function TicketDetalle() {
         )}
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 max-w-4xl mx-auto">
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-md p-3 text-xs text-red-700">
             {error}

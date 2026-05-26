@@ -116,7 +116,7 @@ export default function NuevaOrden() {
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">Nueva orden</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-4 space-y-4">
+      <form onSubmit={handleSubmit} className="p-4 space-y-4 max-w-3xl mx-auto">
         {cargandoOrigen && (
           <div className="bg-gray-50 border border-gray-200 rounded-md p-3 text-xs text-gray-600">
             Cargando datos del origen...

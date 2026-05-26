@@ -140,7 +140,7 @@ export default function Ordenes() {
         </div>
       </div>
 
-      <div className="px-4 py-3 grid grid-cols-1 lg:grid-cols-2 gap-2">
+      <div className="px-4 py-3 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
         {loading && <div className="col-span-full text-center py-10 text-gray-500">Cargando...</div>}
         {!loading && filtradas.length === 0 && (
           <div className="col-span-full text-center py-14 text-gray-500">

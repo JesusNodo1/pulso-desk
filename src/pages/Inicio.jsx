@@ -82,7 +82,7 @@ export default function Inicio() {
             No tenés tickets asignados.
           </div>
         )}
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
           {mios.map(t => {
             const prio = PRIO_CONFIG[t.prioridad] ?? PRIO_CONFIG.media
             return (

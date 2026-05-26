@@ -64,7 +64,7 @@ export default function SistemaDetalle() {
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 max-w-4xl mx-auto">
         <div className="grid grid-cols-3 gap-3">
           <Stat label="Total"    value={ordenes.length} color="text-gray-900" />
           <Stat label="Activas"  value={activas}        color="text-emerald-600" />
